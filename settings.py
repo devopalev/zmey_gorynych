@@ -12,6 +12,6 @@ ALGORITHM = env.str('ALGORITHM', default='HS256')
 ACCESS_TOKEN_EXPIRE_MINUTES = env.int('ACCESS_TOKEN_EXPIRE_MINUTES', default=24 * 60)
 
 # DATABASE
-DB_DSN = env.str('DSN', default='')
+DB_DSN = env.str('DSN', default='postgresql://devopalev:12345@localhost:6432/zmey_gorynych')
 DB_POOL_MIN_SIZE = env.int('DB_POOL_MIN_SIZE', 1)
 DB_POOL_MAX_SIZE = env.int('DB_POOL_MAX_SIZE', 10)

@@ -1,23 +1,27 @@
 import asyncpg
-
+from asyncpg import Pool
 import settings
 
-
-# TODO: del
-async def init_db(app):
-     app['pool'] = await asyncpg.create_pool(database='postgres',
-                                             user='postgres')
-     yield
-     app['pool'].close()
+pool: Pool | None = None
 
 
-pool = asyncpg.pool.create_pool(
-    dsn=settings.DB_DSN,
-    min_size=settings.DB_POOL_MIN_SIZE,
-    max_size=settings.DB_POOL_MAX_SIZE
-)
+async def init():
+    global pool
+    pool = await asyncpg.pool.create_pool(
+        dsn=settings.DB_DSN,
+        min_size=settings.DB_POOL_MIN_SIZE,
+        max_size=settings.DB_POOL_MAX_SIZE
+    )
+
+
+async def shutdown():
+    if pool:
+        await pool.close()
 
 
 async def get_connection() -> asyncpg.Connection:
-    async with pool.acquire() as con:
-        yield con
+    if pool:
+        async with pool.acquire() as con:
+            yield con
+    else:
+        raise ValueError('pool is not initialized')

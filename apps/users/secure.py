@@ -38,10 +38,9 @@ class TokenJWTFactory:
         self._token: TokenView | None = None
 
         if exp:
-            self.expire: int = exp
+            self.expire: datetime = datetime.fromtimestamp(exp)
         else:
-            dt = datetime.utcnow() + timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
-            self.expire: int = int(dt.timestamp())
+            self.expire: datetime = datetime.utcnow() + timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
 
     def create_token(self) -> TokenView:
         if self._token:

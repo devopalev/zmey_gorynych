@@ -10,4 +10,5 @@ class UserRepo:
         self.connection = connection
 
     async def get(self, username) -> User | None:
+
         return User('test', '$2b$12$DyNSDV3kIO6pzWLD00HsJuuEz0Elrskf4uf2KMkiFIlN9w9d0vIkW', ['user'], False)
