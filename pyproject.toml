@@ -1,0 +1,19 @@
+[tool.poetry]
+name = "zmey-gorynych-bot"
+version = "0.1.0"
+description = ""
+authors = ["devopalev <maksim@devopalev.ru>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.11"
+fastapi = "^0.110.2"
+uvicorn = "^0.29.0"
+passlib = "^1.7.4"
+environs = "^11.0.0"
+asyncpg = "^0.29.0"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
