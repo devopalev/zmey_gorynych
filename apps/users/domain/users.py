@@ -16,7 +16,8 @@ class RoleUser(StrEnum):
 
 @dataclass
 class User:
+    id: int
     username: str
-    hashed_password: str
+    password_hashed: str
     roles: list[RoleUser]
-    disabled: bool
+    revoked: bool

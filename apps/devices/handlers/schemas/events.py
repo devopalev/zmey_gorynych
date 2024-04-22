@@ -1,6 +1,5 @@
-from enum import StrEnum, Enum
-from typing import Literal, TypeVar, Self, Any, Union
-from uuid import UUID
+from enum import Enum
+from typing import Any, Union
 
 from pydantic import BaseModel, model_validator
 
@@ -14,10 +13,10 @@ class EventType(str, Enum):
     KEEP_ALIVE = 'keep_alive'
 
     def __str__(self) -> str:
-        return self.value
+        return str(self.value)
 
     @property
-    def schema(self) -> BaseModel | None:
+    def schema(self) -> type[BaseModel] | None:
         match self:
             case self.TEST:
                 return TestDataEvent

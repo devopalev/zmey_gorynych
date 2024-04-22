@@ -1,6 +1,6 @@
-from zmey_gorynych.exceptions import AppError
+from core.exceptions import AppException
 
 
-class AccessError(AppError):
+class AccessError(AppException):
     status_code = 403
     detail = 'Доступ запрещен!'

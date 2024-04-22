@@ -1,32 +1,10 @@
 from datetime import datetime, timedelta
-from typing import Self, Iterable
+from typing import Self
 
-from fastapi import Depends
 from jose import jwt, JWTError
-from passlib.context import CryptContext
 
 import settings
-from apps.users.domain.users import RoleUser
-from apps.users.schemas import TokenView
-
-
-class PasswordHasher:
-    pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
-
-    def __init__(self, password):
-        self.hashed_password = self.hash_password(password)
-
-    def __eq__(self, other):
-        assert isinstance(other, self.__class__)
-        return self.hashed_password == other.hashed_password
-
-    @classmethod
-    def verify_password(cls, plain_password: str, hashed_password: str) -> bool:
-        return cls.pwd_context.verify(plain_password, hashed_password)
-
-    @classmethod
-    def hash_password(cls, password: str) -> str:
-        return cls.pwd_context.hash(password)
+from apps.users.handlers.schemas import TokenView
 
 
 class TokenJWTFactory:

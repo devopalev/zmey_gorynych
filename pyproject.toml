@@ -15,7 +15,10 @@ asyncpg = "^0.29.0"
 python-jose = "^3.3.0"
 bcrypt = "^4.1.2"
 yoyo-migrations = "^8.2.0"
+psycopg2 = "^2.9.9"
 
+[tool.poetry.dev-dependencies]
+uvicorn = "^0.29.0"
 
 [build-system]
 requires = ["poetry-core"]

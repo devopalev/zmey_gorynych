@@ -1,11 +1,13 @@
 import asyncpg
 from asyncpg import Pool
+from yoyo import get_backend, read_migrations
+
 import settings
 
 pool: Pool | None = None
 
 
-async def init():
+async def init_pool():
     global pool
     pool = await asyncpg.pool.create_pool(
         dsn=settings.DB_DSN,
@@ -14,7 +16,7 @@ async def init():
     )
 
 
-async def shutdown():
+async def shutdown_pool():
     if pool:
         await pool.close()
 
@@ -25,3 +27,11 @@ async def get_connection() -> asyncpg.Connection:
             yield con
     else:
         raise ValueError('pool is not initialized')
+
+
+def apply_migrations():
+    backend = get_backend(settings.DB_DSN)
+    migrations = read_migrations(settings.MIGRATIONS_PATH)
+
+    with backend.lock():
+        backend.apply_migrations(backend.to_apply(migrations))

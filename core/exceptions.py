@@ -3,7 +3,7 @@ from typing import Optional, Dict, Any
 from fastapi.exceptions import HTTPException
 
 
-class AppError(HTTPException):
+class AppException(HTTPException):
     status_code: int = 500
     detail: Any = 'Упс... что-то пошло не так'
 

@@ -2,15 +2,15 @@ from typing import Annotated
 
 from fastapi import Depends, APIRouter
 
-from apps.users.schemas import UserAuth, TokenView
+from apps.users.handlers.schemas import UserAuth, TokenView
 
 
 from apps.users.usecases import CreateToken
 
-api_router = APIRouter(tags=['Auth'])
+router = APIRouter(tags=['Users', 'Auth'])
 
 
-@api_router.post(
+@router.post(
     "/api/v1/users/token",
     response_model=TokenView,
     responses={401: {'description': "Incorrect username or password"}}
