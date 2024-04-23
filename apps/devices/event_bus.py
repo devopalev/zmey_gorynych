@@ -12,7 +12,7 @@ class EventBus:
     def __init__(self, background_tasks: BackgroundTasks):
         self.background_tasks = background_tasks
 
-    async def handle_event(self, device_id: UUID, event: Event):
+    async def handle_event(self, device_id: UUID, event: Event) -> None:
         match event.type:
             case event.type.TEST:
                 logging.info('Test OKey!')

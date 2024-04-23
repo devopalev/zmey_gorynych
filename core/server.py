@@ -1,5 +1,6 @@
 import logging
 from contextlib import asynccontextmanager
+from typing import AsyncGenerator
 
 from fastapi import FastAPI
 from fastapi.responses import JSONResponse
@@ -22,7 +23,7 @@ def setup_routes(app: FastAPI) -> None:
 
 
 @asynccontextmanager
-async def lifespan(*args):
+async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     db.apply_migrations()
     await db.init_pool()
 
@@ -31,7 +32,7 @@ async def lifespan(*args):
     await db.shutdown_pool()
 
 
-def create_app():
+def create_app() -> FastAPI:
     app = FastAPI(lifespan=lifespan)
     setup_routes(app)
     return app

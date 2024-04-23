@@ -1,5 +1,5 @@
 from enum import Enum
-from typing import Any, Union
+from typing import Any, Union, Self
 
 from pydantic import BaseModel, model_validator
 
@@ -20,6 +20,7 @@ class EventType(str, Enum):
         match self:
             case self.TEST:
                 return TestDataEvent
+        return None
 
 
 class Event(BaseModel):
@@ -30,7 +31,7 @@ class Event(BaseModel):
     ] = None
 
     @model_validator(mode='after')
-    def validate_data(self):
+    def validate_data(self) -> Self:
         if self.type.schema and not self.data:
             raise ValueError(f'<data> for type={self.type} required!')
         elif not self.type.schema and self.data:

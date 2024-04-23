@@ -15,6 +15,6 @@ class DeviceRepo(BaseRepository):
         return DeviceView(**dict(res.items())) if res else None
 
     @classmethod
-    async def update_activity(cls, uuid: UUID):
+    async def update_activity(cls, uuid: UUID) -> None:
         async with cls.context_connection() as conn:
             await conn.execute(ACTIVITY_DEVICE, uuid)

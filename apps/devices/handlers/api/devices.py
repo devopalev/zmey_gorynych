@@ -14,17 +14,12 @@ from apps.devices.event_bus import EventBus
 router = routing.APIRouter(tags=['Devices'])
 
 
-@router.post(
-    path='/api/v1/devices',
-    description='Создает запись об новом устройстве',
-    dependencies=[SecureUserDep],
-    response_model=DeviceView,
-)
+@router.post(path='/api/v1/devices', description='Создает запись об новом устройстве', dependencies=[SecureUserDep])
 async def create_device(
-        model: DeviceCreateModel,
-        user: Annotated[User, Depends(get_current_user)],
-        use_case: Annotated[usecases.CreateDevice, Depends(usecases.CreateDevice)]
-):
+    model: DeviceCreateModel,
+    user: Annotated[User, Depends(get_current_user)],
+    use_case: Annotated[usecases.CreateDevice, Depends(usecases.CreateDevice)],
+) -> DeviceView:
     return await use_case.execute(user_id=user.id, device_name=model.name)
 
 
@@ -34,9 +29,8 @@ async def create_device(
     dependencies=[SecureUserDep],
 )
 async def get_device(
-        device_id: UUID,
-        use_case: Annotated[usecases.GetDevice, Depends(usecases.GetDevice)]
-):
+    device_id: UUID, use_case: Annotated[usecases.GetDevice, Depends(usecases.GetDevice)]
+) -> DeviceView:
     if device := await use_case.execute(device_id):
         return device
     else:
@@ -47,12 +41,8 @@ async def get_device(
     path='/api/v1/devices/{device_uuid}/event',
     description='Асинхронно обрабатывает события устройств',
     dependencies=[SecureUserDep],
-    tags=['Events']
+    tags=['Events'],
 )
-async def send_events(
-        device_uuid: UUID,
-        event: Event,
-        event_bus: Annotated[EventBus, Depends(EventBus)]
-):
+async def send_events(device_uuid: UUID, event: Event, event_bus: Annotated[EventBus, Depends(EventBus)]) -> Response:
     await event_bus.handle_event(device_uuid, event)
     return Response(status_code=201)

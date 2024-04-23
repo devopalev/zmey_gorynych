@@ -6,7 +6,7 @@ authors = ["devopalev <maksim@devopalev.ru>"]
 readme = "README.md"
 
 [tool.poetry.dependencies]
-python = "^3.11"
+python = "^3.12"
 fastapi = "^0.110.2"
 uvicorn = "^0.29.0"
 passlib = "^1.7.4"
@@ -16,9 +16,10 @@ python-jose = "^3.3.0"
 bcrypt = "^4.1.2"
 yoyo-migrations = "^8.2.0"
 psycopg2 = "^2.9.9"
+uvicorn = "^0.29.0"
 
 [tool.poetry.dev-dependencies]
-uvicorn = "^0.29.0"
+pre-commit = "^3.7.0"
 
 [build-system]
 requires = ["poetry-core"]

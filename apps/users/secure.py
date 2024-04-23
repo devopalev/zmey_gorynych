@@ -1,10 +1,10 @@
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import Self
 
 from jose import jwt, JWTError
 
 import settings
-from apps.users.handlers.schemas import TokenView
+from apps.users.domain.token import TokenView
 
 
 class TokenJWTFactory:
@@ -15,10 +15,13 @@ class TokenJWTFactory:
         self.sub: str = sub
         self._token: TokenView | None = None
 
-        if exp:
-            self.expire: datetime = datetime.fromtimestamp(exp)
+        if exp is None:
+            now = datetime.now(tz=timezone(timedelta(hours=0)))
+            expire = now + +timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
         else:
-            self.expire: datetime = datetime.utcnow() + timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
+            expire = datetime.fromtimestamp(exp)
+
+        self.expire: datetime = expire
 
     def create_token(self) -> TokenView:
         if self._token:

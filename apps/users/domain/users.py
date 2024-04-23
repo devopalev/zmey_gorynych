@@ -10,7 +10,7 @@ class RoleUser(StrEnum):
         return self.value
 
     @classmethod
-    def is_admin(cls, user: 'User'):
+    def is_admin(cls, user: 'User') -> bool:
         return cls.ADMIN in user.roles
 
 

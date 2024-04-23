@@ -5,6 +5,6 @@ from core.repository import BaseRepository
 
 
 class UserRepo(BaseRepository):
-    async def get(self, username) -> User | None:
+    async def get(self, username: str) -> User | None:
         res = await self.connection.fetchrow(GET_USER, username)
         return User(**dict(res.items())) if res else None

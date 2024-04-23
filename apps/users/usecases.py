@@ -1,24 +1,26 @@
 from abc import ABC
+from typing import cast
 
 from fastapi import Depends
 from passlib.context import CryptContext
 from starlette import status
 
+from apps.users.domain.token import TokenView
 from apps.users.exceptions import AccessError
 from apps.users.repository.repo import UserRepo
-from apps.users.handlers.schemas import TokenView, UserAuth
+from apps.users.handlers.schemas import UserAuth
 from apps.users.secure import TokenJWTFactory
 from core.usecases import BaseUseCase
 
 
 class PasswordUseCase(BaseUseCase, ABC):
-    pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+    pwd_context = CryptContext(schemes=['bcrypt'], deprecated='auto')
 
     def _verify_password(self, plain_password: str, hashed_password: str) -> bool:
-        return self.pwd_context.verify(plain_password, hashed_password)
+        return cast(bool, self.pwd_context.verify(plain_password, hashed_password))
 
     def _hash_password(self, password: str) -> str:
-        return self.pwd_context.hash(password)
+        return cast(str, self.pwd_context.hash(password))
 
 
 class CreateToken(PasswordUseCase):
@@ -30,7 +32,7 @@ class CreateToken(PasswordUseCase):
         if not user or not self._verify_password(req_user.password, user.password_hashed) or user.revoked:
             raise AccessError(
                 status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Incorrect username or password, may be user revoked",
-                headers={"WWW-Authenticate": "Bearer"},
+                detail='Incorrect username or password, may be user revoked',
+                headers={'WWW-Authenticate': 'Bearer'},
             )
         return TokenJWTFactory(sub=user.username).create_token()
