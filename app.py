@@ -1,4 +1,4 @@
-from core.server import create_app
+from backend.core.server import create_app
 
 app = create_app()
 

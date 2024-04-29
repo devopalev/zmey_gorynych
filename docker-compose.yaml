@@ -1,0 +1,38 @@
+
+services:
+  db:
+    image: postgres:latest
+    env_file:
+      - .env
+    volumes:
+      - pg_data:/var/lib/postgresql/data/
+    networks:
+      - zmey-gorynych-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build: .
+    ports:
+      - "8080:8080"
+    restart: always
+    environment:
+      - POSTGRES_HOST=db
+      - POSTGRES_PORT=5432
+    env_file:
+      - .env
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - zmey-gorynych-network
+
+volumes:
+  pg_data:
+
+networks:
+  zmey-gorynych-network:
+    name: zmey-gorynych-network
