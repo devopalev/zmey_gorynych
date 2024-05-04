@@ -19,3 +19,6 @@ DB_DSN = f'postgresql://{POSTGRES_USER}:{POSTGRES_PASSWORD}@{POSTGRES_HOST}:{POS
 DB_POOL_MIN_SIZE = env.int('DB_POOL_MIN_SIZE', 1)
 DB_POOL_MAX_SIZE = env.int('DB_POOL_MAX_SIZE', 10)
 MIGRATIONS_PATH = env.str('MIGRATIONS_PATH', default='migrations')
+
+# False - использует pg из settings (windows), True - использует локальный (mac, linux, docker)
+TEST_DB_PROCESS_FACTORY = env.bool('TEST_DB_PROCESS_FACTORY', default=True)

@@ -19,8 +19,8 @@ async def test_create_device(
 ) -> None:
     response = await test_client_user.post(url='/api/v1/devices', json=params)
     json_response = response.json()
-    assert status == response.status_code, json_response
-    assert json_response.get('name') == params.get('name')
+    assert status == response.status_code, response.text
+    assert json_response.get('result', {}).get('name') == params.get('name'), response.text
 
 
 @pytest.mark.parametrize(
@@ -38,6 +38,15 @@ async def test_get_device(
     response = await test_client_user.get(url=f'/api/v1/devices/{device_id}')
     json_response = response.json()
     assert status == response.status_code, json_response
+
+
+async def test_get_devices(
+    test_client_user: httpx.AsyncClient,
+) -> None:
+    response = await test_client_user.get(url='/api/v1/devices')
+    json_response = response.json()
+    assert 200 == response.status_code, json_response
+    assert json_response['result'][0]['id'] == '65799ccd-bbc4-4026-a560-af152880280a'
 
 
 class TestDeviceEvent:
@@ -88,3 +97,21 @@ class TestDeviceEvent:
         json_response = response.json()
         assert 422 == response.status_code, str(json_response)
         assert json_response['detail'][0].get('loc') == loc, str(json_response)
+
+
+async def test_refresh_token(
+    test_client_user: httpx.AsyncClient,
+) -> None:
+    response = await test_client_user.post(url='/api/v1/devices/65799ccd-bbc4-4026-a560-af152880280a/refresh-token')
+    token_json = response.json()['result']
+    assert 201 == response.status_code, token_json
+
+    test_client_user.headers.clear()
+    kwargs = dict(
+        url='/api/v1/devices/65799ccd-bbc4-4026-a560-af152880280a/event', json={'type': 'test', 'data': {'test': 1}}
+    )
+    response = await test_client_user.post(**kwargs)
+    assert 403 == response.status_code
+
+    response = await test_client_user.post(**kwargs, headers={token_json['key']: token_json['value']})
+    assert 201 == response.status_code

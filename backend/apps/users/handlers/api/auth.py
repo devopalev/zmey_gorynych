@@ -17,4 +17,5 @@ router = APIRouter(tags=['Users', 'Auth'])
     responses={401: {'description': 'Incorrect username or password'}},
 )
 async def create_token(req_user: UserAuth, use_case: Annotated[CreateToken, Depends(CreateToken)]) -> TokenView:
-    return await use_case.execute(req_user)
+    token_jwt = await use_case.execute(req_user)
+    return token_jwt.view

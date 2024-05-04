@@ -9,3 +9,10 @@ class DeviceView:
     name: str
     revoked: bool
     last_activity: datetime
+
+
+@dataclass
+class TokenView:
+    value: str
+    key: str = 'x-access-token'
+    type: str = 'API Key'

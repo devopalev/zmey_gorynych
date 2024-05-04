@@ -20,16 +20,27 @@ from fastapi import FastAPI
 from httpx import ASGITransport
 from pytest_mock import MockFixture
 
-from pytest_postgresql import factories as postgresql_factories
+from pytest_postgresql import factories
 from pytest_postgresql.executor import PostgreSQLExecutor
 from pytest_postgresql.janitor import DatabaseJanitor
 
+import settings
 
-postgresql_proc = postgresql_factories.postgresql_proc(
-    host='localhost',
-    port=random.randint(61000, 65000),
-    user='postgres',
-)
+if settings.TEST_DB_PROCESS_FACTORY:
+    postgresql_f = factories.postgresql_proc(
+        host='localhost',
+        port=random.randint(61000, 65000),
+        user='postgres',
+        dbname='zmey_test',
+    )
+else:
+    postgresql_f = factories.postgresql_noproc(
+        host=settings.POSTGRES_HOST,
+        port=settings.POSTGRES_PORT,
+        user=settings.POSTGRES_USER,
+        password=settings.POSTGRES_PASSWORD,
+        dbname='zmey_test',
+    )
 
 
 class EventLoopPolicy(DefaultEventLoopPolicy):
@@ -55,26 +66,27 @@ def event_loop() -> Generator[AbstractEventLoop, None, None]:
 @pytest.fixture(scope='session')
 async def db_conn(
     event_loop: AbstractEventLoop,
-    postgresql_proc: PostgreSQLExecutor,
+    postgresql_f: PostgreSQLExecutor,
 ) -> AsyncGenerator[Connection, None]:
     import settings
 
-    db_host = postgresql_proc.host
-    db_port = postgresql_proc.port
-    db_user = postgresql_proc.user
-    db_name = 'testdb'
+    db_host = postgresql_f.host
+    db_port = postgresql_f.port
+    db_user = postgresql_f.user
+    db_password = postgresql_f.password
+    db_name = postgresql_f.dbname
 
-    db_dsn = f'postgresql://{db_user}@{db_host}:{db_port}/{db_name}'
+    db_dsn = f'postgresql://{db_user}:{db_password}@{db_host}:{db_port}/{db_name}'
 
     # Mock
     settings.DB_DSN = db_dsn
-
     janitor = DatabaseJanitor(
         user=db_user,
+        password=db_password,
         host=db_host,
-        port=str(db_port),
+        port=db_port,
         dbname=db_name,
-        version=postgresql_proc.version,
+        version=postgresql_f.version,
     )
     janitor.init()
 
@@ -128,9 +140,9 @@ async def app(event_loop: AbstractEventLoop, test_db: Connection) -> FastAPI:
 
 @pytest.fixture()
 async def test_client_user(app: FastAPI, event_loop: AbstractEventLoop, base_test_data: None) -> httpx.AsyncClient:
-    from backend.apps.users.secure import TokenJWTFactory
+    from backend.core.security import TokenJWT
 
-    token = TokenJWTFactory(sub='test_user').create_token()
+    token = TokenJWT(sub='test_user').view
 
     async with httpx.AsyncClient(
         transport=ASGITransport(app=app),

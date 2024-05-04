@@ -1,10 +1,14 @@
 from abc import ABC
+from typing import Optional
 from uuid import UUID
 
 from fastapi import Depends
+import secrets
 
-from backend.apps.devices.domain.devices import DeviceView
+from backend.apps.devices.domain.devices import DeviceView, TokenView
 from backend.apps.devices.repository.repo import DeviceRepo
+from backend.apps.users.domain.users import User
+from backend.core.security import hasher
 from backend.core.usecases import BaseUseCase
 
 
@@ -19,5 +23,23 @@ class CreateDevice(BaseUseCaseDevice):
 
 
 class GetDevice(BaseUseCaseDevice):
-    async def execute(self, uuid: UUID) -> DeviceView | None:
-        return await self.device_repo.get(uuid=uuid)
+    async def execute(self, user: User, uuid: UUID) -> DeviceView | None:
+        devices = await self.device_repo.get(user_id=user.id, uuid=uuid)
+        try:  # Если except не ожидается часто, то это быстрее if
+            return devices.pop()
+        except IndexError:
+            return None
+
+
+class GetDevices(BaseUseCaseDevice):
+    async def execute(self, user: User) -> list[DeviceView]:
+        return await self.device_repo.get(user_id=user.id)
+
+
+class RefreshToken(BaseUseCaseDevice):
+    async def execute(self, uuid: UUID) -> Optional[TokenView]:
+        new_token = secrets.token_hex(16)
+        new_hash = hasher.hash(new_token)
+
+        updated = await self.device_repo.save_hash_token(uuid=uuid, token_hash=new_hash)
+        return TokenView(value=new_token) if updated else None
