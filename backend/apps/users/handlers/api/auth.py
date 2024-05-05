@@ -1,9 +1,10 @@
 from typing import Annotated
 
 from fastapi import Depends, APIRouter
+from fastapi.security import OAuth2PasswordRequestForm
 
 from backend.apps.users.domain.token import TokenView
-from backend.apps.users.handlers.schemas import UserAuth, TokenSchema
+from backend.apps.users.handlers.schemas import TokenSchema
 
 from backend.apps.users.usecases import CreateToken
 
@@ -16,6 +17,9 @@ router = APIRouter(tags=['Users', 'Auth'])
     status_code=201,
     responses={401: {'description': 'Incorrect username or password'}},
 )
-async def create_token(req_user: UserAuth, use_case: Annotated[CreateToken, Depends(CreateToken)]) -> TokenView:
-    token_jwt = await use_case.execute(req_user)
+async def create_token(
+        form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
+        use_case: Annotated[CreateToken, Depends(CreateToken)]
+) -> TokenView:
+    token_jwt = await use_case.execute(username=form_data.username, password=form_data.password)
     return token_jwt.view
