@@ -16,6 +16,6 @@ async def test_create_token(
     status: int,
     params: dict[str, str],
 ) -> None:
-    response = await test_client_user.post(url='/api/v1/users/token', json=params)
+    response = await test_client_user.post(url='/api/v1/users/token', data=params)
     json_response = response.json()
     assert status == response.status_code, json_response
