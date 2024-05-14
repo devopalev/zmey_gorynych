@@ -94,6 +94,10 @@ async def db_conn(
     backend.apply_migrations(backend.to_apply(yoyo.read_migrations(os.path.abspath(settings.MIGRATIONS_PATH))))
 
     conn = await asyncpg.connect(db_dsn)
+    file = os.path.abspath('tests/data/base_test_data.sql')
+    with open(file, 'r') as sql:
+        await conn.execute(sql.read())
+
     yield conn
     await conn.close()
 
@@ -139,20 +143,26 @@ async def app(event_loop: AbstractEventLoop, test_db: Connection) -> FastAPI:
 
 
 @pytest.fixture()
-async def test_client_user(app: FastAPI, event_loop: AbstractEventLoop, base_test_data: None) -> httpx.AsyncClient:
+async def test_client_user(app: FastAPI, event_loop: AbstractEventLoop) -> httpx.AsyncClient:
     from backend.core.security import TokenJWT
 
-    token = TokenJWT(sub='test_user').view
+    token = TokenJWT(user_id=1)
 
     async with httpx.AsyncClient(
         transport=ASGITransport(app=app),
         base_url='http://localhost',
-        headers={'Authorization': f'{token.type_token} {token.access_token}'},
+        headers={'Authorization': f'Bearer {token.access_token}'},
     ) as client:
         yield client
 
 
 def db_make_fixture(path: str, recursive: bool = False):  # type: ignore[no-untyped-def]
+    """
+
+    Example:
+        >>> base_test_data = db_make_fixture('/data/base_test_data.sql')
+    """
+
     @pytest.fixture()
     async def db_fixture(test_db: Connection) -> None:
         files = glob.glob(os.path.abspath(f'tests/{path.lstrip("/")}'), recursive=recursive)
@@ -161,6 +171,3 @@ def db_make_fixture(path: str, recursive: bool = False):  # type: ignore[no-unty
                 await test_db.execute(sql.read())
 
     return db_fixture
-
-
-base_test_data = db_make_fixture('/data/base_test_data.sql')

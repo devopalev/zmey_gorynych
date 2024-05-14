@@ -19,3 +19,21 @@ async def test_create_token(
     response = await test_client_user.post(url='/api/v1/users/token', data=params)
     json_response = response.json()
     assert status == response.status_code, json_response
+
+
+async def test_refresh_token(
+    test_client_user: httpx.AsyncClient,
+) -> None:
+    auth_data = {'username': 'test_user', 'password': 'Xx7536951xX'}
+    response = await test_client_user.post(url='/api/v1/users/token', data=auth_data)
+    res_json = response.json()['result']
+    headers = {
+        res_json['access_header_name']: f"{res_json['type_access_token']} {res_json['access_token']}",
+        res_json['refresh_header_name']: res_json['refresh_token'],
+    }
+
+    response = await test_client_user.post(url='/api/v1/users/refresh-token', headers=headers)
+    assert response.status_code == 201
+
+    response = await test_client_user.post(url='/api/v1/users/refresh-token', headers=headers)
+    assert response.status_code == 401

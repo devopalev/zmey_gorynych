@@ -102,9 +102,10 @@ class TestDeviceEvent:
 async def test_refresh_token(
     test_client_user: httpx.AsyncClient,
 ) -> None:
-    response = await test_client_user.post(url='/api/v1/devices/65799ccd-bbc4-4026-a560-af152880280a/refresh-token')
-    token_json = response.json()['result']
-    assert 201 == response.status_code, token_json
+    response = await test_client_user.post(url='/api/v1/devices/65799ccd-bbc4-4026-a560-af152880280a/access-token')
+    res_json = response.json()
+    assert 201 == response.status_code, res_json
+    token_json = res_json.get('result')
 
     test_client_user.headers.clear()
     kwargs = dict(

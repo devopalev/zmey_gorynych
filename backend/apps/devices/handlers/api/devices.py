@@ -51,9 +51,9 @@ async def get_device(
     user: Annotated[User, CurrentUserDep],
     device_id: UUID,
     use_case: Annotated[usecases.GetDevice, Depends(usecases.GetDevice)],
-) -> DeviceView:
+) -> Result[DeviceView]:
     if device := await use_case.execute(user=user, uuid=device_id):
-        return device
+        return Result(result=device)
     else:
         raise HTTPException(status_code=404, detail='Device not found')
 
@@ -61,6 +61,7 @@ async def get_device(
 @router.post(
     path='/api/v1/devices/{device_id}/event',
     description='Асинхронно обрабатывает события устройств',
+    status_code=201,
     dependencies=[DeviceEventPolicy],
     tags=['Events'],
 )
@@ -74,14 +75,14 @@ async def send_events(
 
 
 @router.post(
-    path='/api/v1/devices/{device_id}/refresh-token',
+    path='/api/v1/devices/{device_id}/access-token',
     description='Обновить токен устройства',
     dependencies=[UserPolicy],
     status_code=201,
 )
 async def refresh_token(
     device_id: UUID,
-    use_case: Annotated[usecases.RefreshToken, Depends(usecases.RefreshToken)],
+    use_case: Annotated[usecases.CreateAccessToken, Depends(usecases.CreateAccessToken)],
 ) -> Result[TokenView]:
     token = await use_case.execute(device_id)
     if token:

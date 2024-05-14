@@ -1,9 +1,18 @@
 from dataclasses import dataclass
-from datetime import datetime
+import datetime
 
 
 @dataclass
 class TokenView:
     access_token: str
-    expire_utc: datetime
-    type_token: str = 'Bearer'
+    refresh_token: str
+    expire_utc: datetime.datetime
+    type_access_token: str = 'Bearer'
+    access_header_name: str = 'Authorization'
+    refresh_header_name: str = 'x-refresh-token'
+
+
+@dataclass
+class RefreshToken:
+    user_id: int
+    refresh_token: str

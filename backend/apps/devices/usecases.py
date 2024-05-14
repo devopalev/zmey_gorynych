@@ -23,7 +23,7 @@ class CreateDevice(BaseUseCaseDevice):
 
 
 class GetDevice(BaseUseCaseDevice):
-    async def execute(self, user: User, uuid: UUID) -> DeviceView | None:
+    async def execute(self, user: User, uuid: UUID) -> Optional[DeviceView]:
         devices = await self.device_repo.get(user_id=user.id, uuid=uuid)
         try:  # Если except не ожидается часто, то это быстрее if
             return devices.pop()
@@ -36,7 +36,7 @@ class GetDevices(BaseUseCaseDevice):
         return await self.device_repo.get(user_id=user.id)
 
 
-class RefreshToken(BaseUseCaseDevice):
+class CreateAccessToken(BaseUseCaseDevice):
     async def execute(self, uuid: UUID) -> Optional[TokenView]:
         new_token = secrets.token_hex(16)
         new_hash = hasher.hash(new_token)

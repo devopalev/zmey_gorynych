@@ -1,4 +1,4 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, asdict
 from datetime import datetime, timedelta, timezone
 from typing import Self, cast, Optional
 
@@ -6,12 +6,11 @@ from jose import jwt, JWTError
 from passlib.context import CryptContext
 
 import settings
-from backend.apps.users.domain.token import TokenView
 
 
 @dataclass
 class TokenJWT:
-    sub: str
+    user_id: int
     exp: Optional[datetime] = None
 
     def __post_init__(self) -> None:
@@ -20,14 +19,8 @@ class TokenJWT:
             self.exp = now + timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
 
     @property
-    def view(self) -> TokenView:
-        to_encode = {
-            'sub': self.sub,
-            'exp': self.exp,
-        }
-
-        token = jwt.encode(to_encode, settings.SECRET_KEY, algorithm=settings.ALGORITHM)
-        return TokenView(access_token=token, expire_utc=cast(datetime, self.exp))
+    def access_token(self) -> str:
+        return cast(str, jwt.encode(asdict(self), settings.SECRET_KEY, algorithm=settings.ALGORITHM))
 
     @classmethod
     def from_token(cls, token: str) -> Self:
